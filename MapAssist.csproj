@@ -108,6 +108,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="D2RMosBot\Builds\Build.cs" />
+    <Compile Include="D2RMosBot\Builds\Hammerdin.cs" />
+    <Compile Include="D2RMosBot\Core.cs" />
+    <Compile Include="D2RMosBot\GameInteraction\Input.cs" />
+    <Compile Include="D2RMosBot\GameInteraction\Lifeguard.cs" />
+    <Compile Include="D2RMosBot\Runs\Andariel.cs" />
+    <Compile Include="D2RMosBot\Runs\Countess.cs" />
+    <Compile Include="D2RMosBot\Runs\Nihlathak.cs" />
+    <Compile Include="D2RMosBot\Runs\Run.cs" />
+    <Compile Include="D2RMosBot\Runs\Mephisto.cs" />
+    <Compile Include="D2RMosBot\Runs\Summoner.cs" />
+    <Compile Include="D2RMosBot\SkillConfig.cs" />
+    <Compile Include="D2RMosBot\BotStats.cs" />
     <Compile Include="Forms\AddAreaForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -120,6 +133,12 @@
     <Compile Include="Forms\ConfigEditor.Designer.cs">
       <DependentUpon>ConfigEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="D2RMosBot\D2RMosBot.cs" />
+    <Compile Include="D2RMosBot\GameInteraction\Common.cs" />
+    <Compile Include="D2RMosBot\Inventory.cs" />
+    <Compile Include="D2RMosBot\GameInteraction\Movement.cs" />
+    <Compile Include="D2RMosBot\GameInteraction\Town.cs" />
+    <Compile Include="D2RMosBot\Pathing.cs" />
     <Compile Include="Files\ConfigurationParser.cs" />
     <Compile Include="Files\CRC32.cs" />
     <Compile Include="Files\FileManager.cs" />
@@ -178,6 +197,7 @@
     <Compile Include="Types\ItemsExport.cs" />
     <Compile Include="Types\Locale.cs" />
     <Compile Include="Types\Items.cs" />
+    <Compile Include="Types\Mode.cs" />
     <Compile Include="Types\Missile.cs" />
     <Compile Include="Types\Roster.cs" />
     <Compile Include="Types\MapSeed.cs" />
@@ -250,6 +270,9 @@
     </PackageReference>
     <PackageReference Include="YamlDotNet">
       <Version>11.2.1</Version>
+    </PackageReference>
+    <PackageReference Include="RoyT.AStar">
+      <Version>3.0.2</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
