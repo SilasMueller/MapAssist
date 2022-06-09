@@ -32,7 +32,7 @@ namespace MapAssist.D2Assist.Runs
 
             Movement.MoveToPoint(17602, 8069);
 
-            Movement.Interact(Core.GetAreaData(), new Point(17602, 8069), UnitType.Object);
+            Movement.Interact(new Point(17602, 8069), UnitType.Object);
 
             Common.WaitForLoading(Area.DuranceOfHateLevel3);
 

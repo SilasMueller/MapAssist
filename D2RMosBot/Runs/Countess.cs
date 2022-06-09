@@ -37,7 +37,7 @@ namespace MapAssist.D2Assist.Runs
                 Movement.LootItemsOnGround();
             }
 
-            Movement.ToTownViaPortal();
+            Movement.ToTownViaPortal(build);
 
             Thread.Sleep(5000);
         }

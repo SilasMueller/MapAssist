@@ -70,6 +70,7 @@ namespace MapAssist.D2Assist.Builds
                 monstersInRange = Common.GetMonstersInRange(startPos, radius);
             }
 
+            //TODO pickup items
             Movement.MoveToPoint(startPos);
         }
     }

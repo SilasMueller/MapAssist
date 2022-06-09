@@ -1,4 +1,5 @@
 ﻿using GameOverlay.Drawing;
+using MapAssist.D2Assist.Builds;
 using MapAssist.D2Assist.GameInteraction;
 using MapAssist.Helpers;
 using MapAssist.Types;
@@ -13,7 +14,7 @@ namespace MapAssist.D2Assist
     {
         private static readonly NLog.Logger _log = NLog.LogManager.GetCurrentClassLogger();
 
-        public static void ToTownViaPortal()
+        public static void ToTownViaPortal(Build build = null)
         {
             _log.Info("ToTownViaPortal");
             var gameData = Core.GetGameData();
@@ -42,27 +43,44 @@ namespace MapAssist.D2Assist
                 }
             }
 
-            TakeTownPortal(portalPosition);
+            TakeTownPortal(portalPosition, build);
         }
 
         public static bool OpenTownPortal(out Point position)
         {
             position = new Point();
+            var success = false;
+            var counter = 0;
 
-            Input.KeyPress(SkillConfig.TownPortal);
-            WaitForNeutral();
-            Thread.Sleep(1000);
+            do
+            {
+                counter++;
+                _log.Info("Trying to open new portal (" + counter + ")");
 
-            var portal = Common.GetPlayerPortal();
+                WaitForNeutral();
+                Input.KeyPress(SkillConfig.TownPortal);
+                WaitForNeutral();
+                Thread.Sleep(1000);
 
-            if (portal == null) return false;
+                var portal = Common.GetPlayerPortal();
 
-            position = portal.Position;
+                if (portal != null)
+                {
+                    success = true;
+                }
+                else
+                {
+                    continue;
+                }
 
-            return true;
+                position = portal.Position;
+
+            } while(!success && counter < 4);
+
+            return success;
         }
 
-        public static void TakeTownPortal(Point position)
+        public static void TakeTownPortal(Point position, Build build)
         {
             /* using town portal */
             var gameData = Core.GetGameData();
@@ -75,7 +93,10 @@ namespace MapAssist.D2Assist
                 if(tryCounter > 0)
                 {
                     _log.Info("Clearing portal area");
-                    //TODO clear area around town portal
+                    if (build != null)
+                    {
+                        build.ClearArea(position, 15);
+                    }
                 }
 
                 tryCounter++;
@@ -100,7 +121,7 @@ namespace MapAssist.D2Assist
                 _log.Info("Portal close enough, trying to interact");
                 try
                 {
-                    Interact(areaData, position, UnitType.Object);
+                    Interact(position, UnitType.Object);
                 }
                 catch (MovementException e)
                 {
@@ -133,7 +154,7 @@ namespace MapAssist.D2Assist
                 MoveToWaypoint();
             }
             
-            Interact(Core.GetAreaData(), poi.Position, UnitType.Object);
+            Interact(poi.Position, UnitType.Object);
             Thread.Sleep(100);
             gameData = Core.GetGameData();
             if (!gameData.MenuOpen.Waypoint) throw new MovementException("Failed to interact with waypoint");
@@ -162,16 +183,17 @@ namespace MapAssist.D2Assist
             Common.WaitForLoading(gameData.Area);
         }
 
-        public static void Interact(AreaData areaData, Point position, UnitType hoverUnitType)
+        public static void Interact(Point position, UnitType hoverUnitType)
         {
-            Interact(areaData, position, new UnitType[] { hoverUnitType });
+            Interact(position, new UnitType[] { hoverUnitType });
         }
 
-        public static void Interact(AreaData areaData, Point position, UnitType[] hoverUnitTypes)
+        public static void Interact(Point position, UnitType[] hoverUnitTypes)
         {
             WaitForNeutral();
 
             var gameData = Core.GetGameData();
+            var areaData = Core.GetAreaData();
             var currPlayer = gameData.PlayerUnit;
 
             var offsets = Common.GetPointsSurroundingPoint(position, 4);
@@ -230,7 +252,7 @@ namespace MapAssist.D2Assist
                 {
                     try
                     {
-                        Interact(currentAreaData, poiQuest.Position, UnitType.Tile);
+                        Interact(poiQuest.Position, UnitType.Tile);
                     }
                     catch(MovementException e)
                     {
@@ -284,7 +306,7 @@ namespace MapAssist.D2Assist
                 {
                     var startPoint = nextLevel.Exits.FirstOrDefault(x => Pathing.CalculateDistance(x, poiNextArea.Position) < 10);
                     var endPoint = currentLevel.Exits.FirstOrDefault(x => Pathing.CalculateDistance(x, poiNextArea.Position) < 10);
-                    var pointInNextArea = Common.GetPointPastPointInSameDirection(startPoint, endPoint, 10);
+                    var pointInNextArea = Common.GetPointPastPointInSameDirection(startPoint, endPoint, 8);
                     Pathing.currentPath.Add(pointInNextArea);
                 }
                 else if(nextLevel == null || currentLevel == null)
@@ -309,7 +331,7 @@ namespace MapAssist.D2Assist
 
                 if (nextLevel != null && nextLevel.IsPortal)
                 {
-                    Interact(currentAreaData, poiNextArea.Position, new UnitType[] {UnitType.Tile,  UnitType.Object});
+                    Interact(poiNextArea.Position, new UnitType[] {UnitType.Tile,  UnitType.Object});
                     // wait for the next level to load
                     Common.WaitForLoading(currentArea);
                 }
@@ -346,6 +368,7 @@ namespace MapAssist.D2Assist
         internal static bool PickUpItem(UnitItem item)
         {
             _log.Info("Picking up item: " + item.HashString);
+            //TODO clearArea
 
             GameData gameData = Core.GetGameData();
             AreaData areaData = Core.GetAreaData();

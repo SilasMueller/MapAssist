@@ -1,4 +1,5 @@
-﻿using GameOverlay.Windows;
+﻿using GameOverlay.Drawing;
+using GameOverlay.Windows;
 using MapAssist.D2Assist.Builds;
 using MapAssist.D2Assist.Runs;
 using MapAssist.Helpers;
@@ -21,6 +22,7 @@ namespace MapAssist.D2Assist
 
         //TODO kauft manchmal ein town portal auch wenn buch voll ist
         //TODO send log to file
+        //TODO knopf um komplett abzubrechen (lifeguard panicMode)
 
         public static Build GetBuild()
         {
@@ -65,7 +67,7 @@ namespace MapAssist.D2Assist
                             BotStats.LogFailedRun(_runs[i]);
                             try
                             {
-                                Movement.ToTownViaPortal();
+                                Movement.ToTownViaPortal(_build);
                             }
                             catch (Exception ex2)
                             {
@@ -118,7 +120,8 @@ namespace MapAssist.D2Assist
                 {
                     try
                     {
-                        Movement.MoveToQuest(true);
+                        //Movement.MoveToQuest(true);
+                        //Movement.ToTownViaPortal();
                     }
                     catch (Exception ex)
                     {
@@ -128,12 +131,19 @@ namespace MapAssist.D2Assist
 
                 if (args.KeyCode == Keys.F10)
                 {
-                    Start(new Hammerdin(), new List<Run> { new Mephisto(), new Countess(), new Summoner(), new Nihlathak() });
-                    //Start(new Hammerdin(), new List<Run> { new Andariel() });
+                    //Start(new Hammerdin(), new List<Run> { new Mephisto(), new Countess(), new Summoner(), new Nihlathak() });
+                    Start(new Hammerdin(), new List<Run> { /*new Andariel(),*/ new Diablo() });
                     
                     /*var build = new Hammerdin();
-                    var andy = new Andariel();
-                    andy.Execute(build);*/
+                    var run = new Diablo();
+                    try
+                    {
+                        run.Execute(build);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Info(ex.Message);
+                    }*/
                 }
 
                 if (args.KeyCode == Keys.F11)

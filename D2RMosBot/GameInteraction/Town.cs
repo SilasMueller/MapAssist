@@ -12,6 +12,7 @@ using MapAssist.D2Assist.GameInteraction;
 namespace MapAssist.D2Assist
 {
     //TODO add crafting for gems
+    //TODO add crafting for rejuvs
     public static class Town
     {
         private static readonly NLog.Logger _log = NLog.LogManager.GetCurrentClassLogger();
@@ -344,7 +345,7 @@ namespace MapAssist.D2Assist
             var chest = areaData.Objects[GameObject.Bank][0];
             Movement.MoveToPoint(chest);
 
-            Movement.Interact(areaData, chest, UnitType.Object);
+            Movement.Interact(chest, UnitType.Object);
 
             Thread.Sleep(500);
 
@@ -454,7 +455,7 @@ namespace MapAssist.D2Assist
                         Movement.MoveToPoint(corpse.Position);
                         Thread.Sleep(500);
                     }
-                    Movement.Interact(_areaData, corpse.Position, UnitType.Player);
+                    Movement.Interact(corpse.Position, UnitType.Player);
                     Thread.Sleep(500);
                 }
             }
@@ -588,7 +589,7 @@ namespace MapAssist.D2Assist
 
                 try
                 {
-                    Movement.Interact(_areaData, monster.Position, UnitType.Monster);
+                    Movement.Interact(monster.Position, UnitType.Monster);
                 }
                 catch(MovementException)
                 {

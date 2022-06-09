@@ -42,6 +42,7 @@ namespace MapAssist.D2Assist.Builds
         {
             //TODO pruefen ob der mode auf cast steht. wenn lange nicht auf cast, dann erneut casten
             //TODO limit total runtime to x minutes
+            //TODO move around if target not hit
 
             _log.Info("Killing single target " + monster.Npc);
 
