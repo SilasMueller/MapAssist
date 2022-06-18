@@ -52,7 +52,7 @@ namespace MapAssist.D2Assist.Builds
             if (Pathing.CalculateDistance(gameData.PlayerPosition, monster.Position) > 5)
             {
                 Movement.MoveToPoint(new Point(monster.Position.X + 2, monster.Position.Y + 2));
-
+                Movement.WaitForNeutral();
                 gameData = Core.GetGameData();
                 monster = gameData.Monsters.FirstOrDefault(x => x.UnitId == monster.UnitId && !x.IsCorpse);
                 if (monster == null) return;

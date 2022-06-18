@@ -269,83 +269,108 @@ namespace MapAssist.D2Assist
         }
 
 
+        private static void MoveToNextAreaPortal(PointOfInterest poiNextArea)
+        {
+            var gameData = Core.GetGameData();
+            var currentAreaData = Core.GetAreaData();
+
+            var movementPath = Pathing.GetPathToLocation(gameData.PlayerPosition, poiNextArea.Position);
+
+            if (movementPath.Path.Count == 0) throw new MovementException("No valid path found");
+
+            MoveAlongPath(movementPath);
+            WaitForNeutral();
+
+            Thread.Sleep(100);
+
+            Interact(poiNextArea.Position, new UnitType[] { UnitType.Tile, UnitType.Object });
+            // wait for the next level to load
+            Common.WaitForLoading(currentAreaData.Area);
+
+            WaitForNeutral();
+        }
+
+        private static void MoveToNextAreaNoPortal(PointOfInterest poiNextArea)
+        {
+            var gameData = Core.GetGameData();
+            var currentAreaData = Core.GetAreaData();
+            var nextArea = poiNextArea.NextArea;
+            var currentArea = currentAreaData.Area;
+
+            var nextAreaData = currentAreaData.AdjacentAreas.FirstOrDefault(x => x.Key == nextArea).Value;
+            var nextLevel = currentAreaData.AdjacentLevels.FirstOrDefault(x => x.Key == nextArea).Value;
+            var currentLevel = nextAreaData.AdjacentLevels.FirstOrDefault(x => x.Key == currentArea).Value;
+
+            var movementPath = Pathing.GetPathToLocation(gameData.PlayerPosition, poiNextArea.Position);
+
+            if (movementPath.Path.Count == 0) throw new MovementException("No valid path found");
+
+            if (nextLevel != null && currentLevel != null)
+            {
+                var startPoint = nextLevel.Exits.FirstOrDefault(x => Pathing.CalculateDistance(x, poiNextArea.Position) < 10);
+                var endPoint = currentLevel.Exits.FirstOrDefault(x => Pathing.CalculateDistance(x, poiNextArea.Position) < 10);
+                var pointInNextArea = Common.GetPointPastPointInSameDirection(startPoint, endPoint, 8);
+                Pathing.currentPath.Add(pointInNextArea);
+            }
+            else
+            {
+                var startPoint = movementPath.Path[Math.Max(movementPath.Path.Count - 2, 0)];
+                var endPoint = poiNextArea.Position;
+                var pointInNextArea = Common.GetPointPastPointInSameDirection(startPoint, endPoint, 10);
+                Pathing.currentPath.Add(pointInNextArea);
+            }
+
+            MoveAlongPath(movementPath);
+            WaitForNeutral();
+        }
+
         public static void MoveToNextArea()
         {
             var tryCount = 0;
+
+            var gameData = Core.GetGameData();
+            var currentAreaData = Core.GetAreaData();
+            var pointsOfInterest = Core.GetPois();
+
+            if (gameData == null || currentAreaData == null || pointsOfInterest == null) throw new MovementException("GameData/AreaData/Pois null");
+
+            var currentArea = currentAreaData.Area;
+            PointOfInterest poiNextArea = pointsOfInterest.Find(x => (x.Type == PoiType.NextArea) && (x.Area == currentArea));
+            var nextArea = poiNextArea.NextArea;
+            var nextLevel = currentAreaData.AdjacentLevels.FirstOrDefault(x => x.Key == nextArea).Value;
+
+            if (poiNextArea == null) throw new MovementException("No NextArea poi found");
 
             do
             {
                 tryCount++;
 
-                var gameData = Core.GetGameData();
-                var currentAreaData = Core.GetAreaData();
-                var pointsOfInterest = Core.GetPois();
-
-                if (gameData == null || currentAreaData == null || pointsOfInterest == null) continue;
-
-                var currentArea = currentAreaData.Area;
-
-                PointOfInterest poiNextArea = pointsOfInterest.Find(x => (x.Type == PoiType.NextArea) && (x.Area == currentArea));
-
-                if (poiNextArea == null) throw new MovementException("No NextArea poi found");
-
-                var nextArea = poiNextArea.NextArea;
-
-
                 _log.Info("Starting Movement ("+ tryCount + ") to next Area " + nextArea);
-
-                var nextAreaData = currentAreaData.AdjacentAreas.FirstOrDefault(x => x.Key == nextArea).Value;
-                var nextLevel = currentAreaData.AdjacentLevels.FirstOrDefault(x => x.Key == nextArea).Value; 
-                var currentLevel = nextAreaData.AdjacentLevels.FirstOrDefault(x => x.Key == currentArea).Value; 
-
-                var movementPath = Pathing.GetPathToLocation(gameData.PlayerPosition, poiNextArea.Position);
-
-                if (movementPath.Path.Count == 0) continue;
-
-                if (nextLevel != null && currentLevel != null && !nextLevel.IsPortal)
-                {
-                    var startPoint = nextLevel.Exits.FirstOrDefault(x => Pathing.CalculateDistance(x, poiNextArea.Position) < 10);
-                    var endPoint = currentLevel.Exits.FirstOrDefault(x => Pathing.CalculateDistance(x, poiNextArea.Position) < 10);
-                    var pointInNextArea = Common.GetPointPastPointInSameDirection(startPoint, endPoint, 8);
-                    Pathing.currentPath.Add(pointInNextArea);
-                }
-                else if(nextLevel == null || currentLevel == null)
-                {
-                    var startPoint = movementPath.Path[Math.Max(movementPath.Path.Count-2, 0)];
-                    var endPoint = poiNextArea.Position;
-                    var pointInNextArea = Common.GetPointPastPointInSameDirection(startPoint, endPoint, 10);
-                    Pathing.currentPath.Add(pointInNextArea);
-                }
 
                 try
                 {
-                    MoveAlongPath(movementPath);
+                    if(nextLevel != null && nextLevel.IsPortal)
+                    {
+                        MoveToNextAreaPortal(poiNextArea);
+                    }
+                    else
+                    {
+                        MoveToNextAreaNoPortal(poiNextArea);
+                    }
                 }
-                catch (MovementException e)
+                catch (Exception e)
                 {
                     _log.Info(e.ToString());
                     continue;
                 }
 
-                Thread.Sleep(100);
-
-                if (nextLevel != null && nextLevel.IsPortal)
-                {
-                    Interact(poiNextArea.Position, new UnitType[] {UnitType.Tile,  UnitType.Object});
-                    // wait for the next level to load
-                    Common.WaitForLoading(currentArea);
-                }
-                WaitForNeutral();
-                Thread.Sleep(100);
-
                 currentAreaData = Core.GetAreaData();
 
-                if (currentAreaData.Area != nextArea) throw new MovementException("Failed to reach next area");
+                if (currentAreaData.Area == nextArea) return;
 
-                break;
             } while (tryCount < 4);
 
-            _log.Info("Arrived in next Area ");
+            throw new MovementException("Failed to reach next area");
         }
 
         public static bool LootItemsOnGround()

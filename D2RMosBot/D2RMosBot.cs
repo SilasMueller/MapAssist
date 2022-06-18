@@ -122,6 +122,8 @@ namespace MapAssist.D2Assist
                     {
                         //Movement.MoveToQuest(true);
                         //Movement.ToTownViaPortal();
+                        //Movement.MoveToNextArea();
+                        Town.DoTownChores();
                     }
                     catch (Exception ex)
                     {
@@ -217,10 +219,14 @@ namespace MapAssist.D2Assist
                     _log.Info(hoverData.UnitId);
                     _log.Info(hoverData.IsHovered);
                     _log.Info(hoverData.IsItemTooltip);
-                    
-
-
                 }
+
+
+                if (args.KeyCode == Keys.Delete)
+                {
+                    Lifeguard.Killswitch();
+                }
+                
             }
         }
 

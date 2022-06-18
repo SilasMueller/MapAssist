@@ -156,6 +156,11 @@ namespace MapAssist.D2Assist
                 _log.Info("Lifeguard already running");
             }
         }
+
+        internal static void Killswitch()
+        {
+            PanicMode = true;
+        }
     }
 
     [Serializable]

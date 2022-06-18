@@ -268,6 +268,7 @@ namespace MapAssist.Helpers
             var brush = CreateBrush(gfx, Color.Red);
 
             var gameData = Core.GetGameData();
+            var areaData = Core.GetAreaData();
 
             var playerVector = new Vector2(gameData.PlayerPosition.X, gameData.PlayerPosition.Y);
 
@@ -330,6 +331,30 @@ namespace MapAssist.Helpers
             anchor.Y += 20;
 
             text = "LoadingScreen: " + menuData.LoadingScreen;
+            DrawText(gfx, anchor, text, font, fontSize, textColor, true, textAlign);
+            anchor.Y += 20;
+
+            text = "PlayerPos walkable: " + areaData.IsWalkableTile(gameData.PlayerPosition);
+            DrawText(gfx, anchor, text, font, fontSize, textColor, true, textAlign);
+            anchor.Y += 20;
+
+            var point = new Point(gameData.PlayerPosition.X + 2, gameData.PlayerPosition.Y);
+            text = "PlayerPos + 2,0 walkable: " + areaData.IsWalkableTile(point);
+            DrawText(gfx, anchor, text, font, fontSize, textColor, true, textAlign);
+            anchor.Y += 20;
+
+            point = new Point(gameData.PlayerPosition.X - 2, gameData.PlayerPosition.Y);
+            text = "PlayerPos + -2,0 walkable: " + areaData.IsWalkableTile(point);
+            DrawText(gfx, anchor, text, font, fontSize, textColor, true, textAlign);
+            anchor.Y += 20;
+
+            point = new Point(gameData.PlayerPosition.X, gameData.PlayerPosition.Y + 2);
+            text = "PlayerPos + 0,2 walkable: " + areaData.IsWalkableTile(point);
+            DrawText(gfx, anchor, text, font, fontSize, textColor, true, textAlign);
+            anchor.Y += 20;
+
+            point = new Point(gameData.PlayerPosition.X, gameData.PlayerPosition.Y - 2);
+            text = "PlayerPos + 0,-2 walkable: " + areaData.IsWalkableTile(point);
             DrawText(gfx, anchor, text, font, fontSize, textColor, true, textAlign);
             anchor.Y += 20;
         }

@@ -110,6 +110,15 @@ namespace MapAssist.Types
     {
         private static readonly float DistanceBetweenCells = 5.0f;
 
+        public static bool IsWalkableTile(this AreaData areaData, Point point)
+        {
+            var relativePosition = new Point(point.X - areaData.Origin.X, point.Y - areaData.Origin.Y);
+
+            var tile = areaData.CollisionGrid[(int)relativePosition.Y][(int)relativePosition.X];
+
+            return tile == 0 || tile == 16;
+        }
+
         public static bool TryMapToPointInMap(this AreaData areaData, Point point, out Point relativePoint)
         {
             try

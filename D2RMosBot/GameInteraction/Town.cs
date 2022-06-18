@@ -18,11 +18,11 @@ namespace MapAssist.D2Assist
         private static readonly NLog.Logger _log = NLog.LogManager.GetCurrentClassLogger();
         private static AreaData _areaData;
 
-        private static readonly TownConfig[] configs = { new TownConfig { shopNpc = Npc.Akara,   shopDialogueOption = 1, repairNpc = Npc.Charsi, healNpc = Npc.Akara  , identifyNpc = Npc.DeckardCain5, mercNpc = Npc.Kashya   },
-                                                         new TownConfig { shopNpc = Npc.Drognan, shopDialogueOption = 1, repairNpc = Npc.Fara  , healNpc = Npc.Fara   , identifyNpc = Npc.DeckardCain2, mercNpc = Npc.Greiz    },
-                                                         new TownConfig { shopNpc = Npc.Ormus,   shopDialogueOption = 1, repairNpc = Npc.Hratli, healNpc = Npc.Ormus  , identifyNpc = Npc.DeckardCain3, mercNpc = Npc.Asheara  },
-                                                         new TownConfig { shopNpc = Npc.Jamella, shopDialogueOption = 0, repairNpc = Npc.Halbu , healNpc = Npc.Jamella, identifyNpc = Npc.DeckardCain4, mercNpc = Npc.Tyrael   },
-                                                         new TownConfig { shopNpc = Npc.Malah,   shopDialogueOption = 1, repairNpc = Npc.Larzuk, healNpc = Npc.Malah  , identifyNpc = Npc.DeckardCain6, mercNpc = Npc.QualKehk },
+        private static readonly TownConfig[] configs = { new TownConfig { shopNpc = Npc.Akara,   shopDialogueOption = 1, repairNpc = Npc.Charsi, healNpc = Npc.Akara  , identifyNpc = Npc.DeckardCain5, mercNpcs = new Npc[]{Npc.Kashya                            } },
+                                                         new TownConfig { shopNpc = Npc.Drognan, shopDialogueOption = 1, repairNpc = Npc.Fara  , healNpc = Npc.Fara   , identifyNpc = Npc.DeckardCain2, mercNpcs = new Npc[]{Npc.Greiz                             } },
+                                                         new TownConfig { shopNpc = Npc.Ormus,   shopDialogueOption = 1, repairNpc = Npc.Hratli, healNpc = Npc.Ormus  , identifyNpc = Npc.DeckardCain3, mercNpcs = new Npc[]{Npc.Asheara                           } },
+                                                         new TownConfig { shopNpc = Npc.Jamella, shopDialogueOption = 0, repairNpc = Npc.Halbu , healNpc = Npc.Jamella, identifyNpc = Npc.DeckardCain4, mercNpcs = new Npc[]{Npc.Tyrael  , Npc.Tyrael2, Npc.Tyrael3} },
+                                                         new TownConfig { shopNpc = Npc.Malah,   shopDialogueOption = 1, repairNpc = Npc.Larzuk, healNpc = Npc.Malah  , identifyNpc = Npc.DeckardCain6, mercNpcs = new Npc[]{Npc.QualKehk                          } },
                                                        };
 
         private struct TownConfig
@@ -32,7 +32,7 @@ namespace MapAssist.D2Assist
             public Npc repairNpc;
             public Npc healNpc;
             public Npc identifyNpc;
-            public Npc mercNpc;
+            public Npc[] mercNpcs;
         }
 
         private static int MapTownAreaToAct(Area area)
@@ -428,11 +428,24 @@ namespace MapAssist.D2Assist
             // if we have found a valid and living merc, return true
             if (merc != null) return true;
 
-            var success = MoveAndInteractWithTownNpc(townConfig.mercNpc, false);
+            var success = false;
+            var successNpc = Npc.NpcNotApplicable;
+            foreach (var npc in townConfig.mercNpcs)
+            {
+                success = MoveAndInteractWithTownNpc(npc, false);
+                if (success)
+                {
+                    successNpc = npc;
+                    break;
+                }
+            }
 
             if (!success) return false;
 
-            SelectNpcDialogueOption(1);
+            var dialogueOption = 1;
+            if(successNpc == Npc.Tyrael2) dialogueOption = 2;
+
+            SelectNpcDialogueOption(dialogueOption);
 
             Thread.Sleep(500);
             Input.KeyPress(Keys.Escape);
